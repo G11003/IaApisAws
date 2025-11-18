@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Full Stack AWS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 50px; }
+        .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Procesador Matemático Distribuido</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="expressionInput" class="form-label">Ingrese expresión matemática:</label>
+                        <input type="text" class="form-control" id="expressionInput" placeholder="Ej: 25 * 4 + 10">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="enviarCalculo()">Calcular y Guardar</button>
+                    </div>
+
+                    <hr>
+                    
+                    <div class="alert alert-secondary mt-3" role="alert" id="resultArea" style="display: none;">
+                        <strong>Resultado:</strong> <span id="resultValue"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function enviarCalculo() {
+        const expresion = document.getElementById('expressionInput').value;
+        const resultArea = document.getElementById('resultArea');
+        const resultValue = document.getElementById('resultValue');
+
+        // URL de tu Webhook de producción de n8n
+        // REEMPLAZAR CON TU URL REAL DE N8N
+        const n8nWebhookUrl = 'https://g11003.app.n8n.cloud/webhook/8db1bc2b-faf7-44fe-b88b-7bb9a78d9678';
+
+        if (!expresion) {
+            alert("Por favor ingresa una operación");
+            return;
+        }
+
+        // Mostrar estado de carga
+        resultValue.innerText = "Procesando en AWS...";
+        resultArea.style.display = "block";
+        resultArea.className = "alert alert-info mt-3";
+
+        try {
+            const response = await fetch(n8nWebhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ operacion: expresion })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la comunicación con n8n');
+            }
+
+            const data = await response.json();
+            
+            // Mostrar resultado final
+            resultArea.className = "alert alert-success mt-3";
+            resultValue.innerText = data.resultado;
+
+        } catch (error) {
+            console.error(error);
+            resultArea.className = "alert alert-danger mt-3";
+            resultValue.innerText = "Error: " + error.message;
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
